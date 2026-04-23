@@ -30,9 +30,13 @@ public class TenantHolder {
      * Sets the PostgreSQL session variable {@code app.current_tenant} and enables
      * the Hibernate {@code tenantFilter} for the current persistence context.
      *
+     * <p>Intended to be called within an existing transaction (e.g., from a service method
+     * or interceptor). For automatic per-request Hibernate filter activation, see
+     * {@link TenantInterceptor}.
+     *
      * @param tenantId the tenant UUID extracted from the JWT
      */
-    @Transactional(propagation = Propagation.MANDATORY)
+    @Transactional(propagation = Propagation.REQUIRED)
     public void setTenantForRequest(UUID tenantId) {
         if (tenantId == null) {
             log.warn("Attempted to set null tenant ID — skipping RLS configuration");
