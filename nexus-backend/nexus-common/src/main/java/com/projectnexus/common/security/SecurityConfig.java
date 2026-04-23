@@ -50,7 +50,11 @@ public class SecurityConfig {
                                 "/swagger-ui/**",
                                 "/swagger-ui.html"
                         ).permitAll()
-                        // TODO: Tighten to .authenticated() once auth flows are complete
+                        // MVP BOOTSTRAP: permit-all while auth flows are being built.
+                        // Phase 2: Change to .authenticated() and add role-based rules:
+                        //   .requestMatchers("/api/v1/contracts/**").hasAnyRole("ADMIN", "UPSTREAM")
+                        //   .requestMatchers("/api/v1/expectations/**").hasAnyRole("ADMIN", "DOWNSTREAM")
+                        //   .anyRequest().authenticated()
                         .anyRequest().permitAll()
                 )
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
