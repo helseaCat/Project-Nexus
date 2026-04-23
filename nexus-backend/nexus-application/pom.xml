@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 https://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <parent>
+        <groupId>com.projectnexus</groupId>
+        <artifactId>nexus-backend</artifactId>
+        <version>0.1.0-SNAPSHOT</version>
+    </parent>
+
+    <artifactId>nexus-application</artifactId>
+    <name>Nexus Application - Spring Boot Entry Point</name>
+    <description>Thin bootstrapper that assembles all modules</description>
+
+    <dependencies>
+        <!-- All bounded context modules -->
+        <dependency>
+            <groupId>com.projectnexus</groupId>
+            <artifactId>nexus-common</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.projectnexus</groupId>
+            <artifactId>nexus-contracts</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.projectnexus</groupId>
+            <artifactId>nexus-alignment</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.projectnexus</groupId>
+            <artifactId>nexus-tasks</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.projectnexus</groupId>
+            <artifactId>nexus-ai</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>com.projectnexus</groupId>
+            <artifactId>nexus-ingestion</artifactId>
+        </dependency>
+
+        <!-- Runtime dependencies -->
+        <dependency>
+            <groupId>org.postgresql</groupId>
+            <artifactId>postgresql</artifactId>
+            <scope>runtime</scope>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-core</artifactId>
+        </dependency>
+        <dependency>
+            <groupId>org.flywaydb</groupId>
+            <artifactId>flyway-database-postgresql</artifactId>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.springframework.boot</groupId>
+                <artifactId>spring-boot-maven-plugin</artifactId>
+                <configuration>
+                    <excludes>
+                        <exclude>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                        </exclude>
+                    </excludes>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+</project>
