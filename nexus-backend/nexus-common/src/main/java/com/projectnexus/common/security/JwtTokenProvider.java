@@ -36,9 +36,15 @@ public class JwtTokenProvider {
     private final SecretKey signingKey;
     private final long expirationHours;
 
+    private static final int MIN_SECRET_LENGTH = 32;
+
     public JwtTokenProvider(
             @Value("${nexus.security.jwt.secret:default-dev-secret-key-change-in-production-min-32-chars}") String secret,
             @Value("${nexus.security.jwt.expiration-hours:24}") long expirationHours) {
+        if (secret.length() < MIN_SECRET_LENGTH) {
+            throw new IllegalArgumentException(
+                    "JWT secret must be at least " + MIN_SECRET_LENGTH + " characters for HMAC-SHA256");
+        }
         this.signingKey = Keys.hmacShaKeyFor(secret.getBytes(StandardCharsets.UTF_8));
         this.expirationHours = expirationHours;
     }

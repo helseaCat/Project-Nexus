@@ -87,4 +87,11 @@ class JwtTokenProviderTest {
         assertTrue(provider.validateToken(token));
         assertEquals(List.of(), provider.extractRoles(token));
     }
+
+    @Test
+    @DisplayName("Should reject secret shorter than 32 characters")
+    void shouldRejectShortSecret() {
+        assertThrows(IllegalArgumentException.class,
+                () -> new JwtTokenProvider("too-short", EXPIRATION_HOURS));
+    }
 }
