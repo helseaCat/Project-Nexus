@@ -8,10 +8,19 @@ import lombok.Setter;
 
 /**
  * Defines a single variable/field within a Data Contract's schema.
- * Includes type, unit, acceptable range, and quality rules.
+ *
+ * <p>Each test variable specifies:
+ * <ul>
+ *   <li>Name and data type (e.g., "chamber_pressure", "DOUBLE")</li>
+ *   <li>Unit of measurement (e.g., "bar", "N", "°C")</li>
+ *   <li>Acceptable range ({@code minValue} to {@code maxValue})</li>
+ *   <li>Quality rules (free-text validation criteria)</li>
+ * </ul>
  */
 @Entity
-@Table(name = "test_variables")
+@Table(name = "test_variables", indexes = {
+        @Index(name = "idx_testvars_contract", columnList = "data_contract_id")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -24,9 +33,10 @@ public class TestVariable extends BaseTenantEntity {
     @Column(nullable = false)
     private String name;
 
-    @Column(name = "data_type", nullable = false)
+    @Column(name = "data_type", nullable = false, length = 50)
     private String dataType;
 
+    @Column(length = 50)
     private String unit;
 
     @Column(name = "min_value")
@@ -35,6 +45,6 @@ public class TestVariable extends BaseTenantEntity {
     @Column(name = "max_value")
     private Double maxValue;
 
-    @Column(columnDefinition = "TEXT")
+    @Column(name = "quality_rules", columnDefinition = "TEXT")
     private String qualityRules;
 }
