@@ -13,6 +13,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.ArgumentCaptor;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -82,6 +83,14 @@ class AlignmentServiceImplTest {
         assertNotNull(response.id());
         assertEquals("CRITICAL", response.severity());
         assertTrue(response.active());
+
+        ArgumentCaptor<AlignmentExpectation> captor = ArgumentCaptor.forClass(AlignmentExpectation.class);
+        verify(repository).save(captor.capture());
+        AlignmentExpectation persisted = captor.getValue();
+        assertEquals(tenantId, persisted.getTenantId());
+        assertEquals(contractId, persisted.getDataContractId());
+        assertEquals("Pressure limit", persisted.getName());
+        assertEquals("chamber_pressure < 115", persisted.getRuleExpression());
     }
 
     @Test
@@ -117,13 +126,22 @@ class AlignmentServiceImplTest {
     }
 
     @Test
-    @DisplayName("Should deactivate and activate expectation")
-    void shouldToggleActive() {
+    @DisplayName("Should deactivate expectation")
+    void shouldDeactivate() {
         AlignmentExpectation e = expectation(true);
         when(repository.findByIdAndTenantId(e.getId(), tenantId)).thenReturn(Optional.of(e));
         when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         assertFalse(service.deactivate(e.getId()).active());
+    }
+
+    @Test
+    @DisplayName("Should activate expectation")
+    void shouldActivate() {
+        AlignmentExpectation e = expectation(false);
+        when(repository.findByIdAndTenantId(e.getId(), tenantId)).thenReturn(Optional.of(e));
+        when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
+
         assertTrue(service.activate(e.getId()).active());
     }
 
