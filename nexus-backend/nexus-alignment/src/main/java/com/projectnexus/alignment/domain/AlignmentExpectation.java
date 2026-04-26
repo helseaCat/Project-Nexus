@@ -10,10 +10,16 @@ import java.util.UUID;
 
 /**
  * Downstream-defined expectation against a published Data Contract.
- * Monitored on every payload ingestion for deviation detection.
+ *
+ * <p>Downstream teams create expectations to monitor upstream data against
+ * their own safety or quality thresholds. Every incoming payload is evaluated
+ * against all active expectations for the linked contract.
  */
 @Entity
-@Table(name = "alignment_expectations")
+@Table(name = "alignment_expectations", indexes = {
+        @Index(name = "idx_expectations_contract", columnList = "data_contract_id"),
+        @Index(name = "idx_expectations_tenant_contract", columnList = "tenant_id, data_contract_id")
+})
 @Getter
 @Setter
 @NoArgsConstructor
@@ -29,7 +35,7 @@ public class AlignmentExpectation extends BaseTenantEntity {
     private String description;
 
     @Enumerated(EnumType.STRING)
-    @Column(nullable = false)
+    @Column(nullable = false, length = 20)
     private Severity severity = Severity.WARNING;
 
     @Column(name = "rule_expression", columnDefinition = "TEXT", nullable = false)
@@ -37,4 +43,18 @@ public class AlignmentExpectation extends BaseTenantEntity {
 
     @Column(nullable = false)
     private boolean active = true;
+
+    /**
+     * Deactivates this expectation so it is no longer evaluated on incoming payloads.
+     */
+    public void deactivate() {
+        this.active = false;
+    }
+
+    /**
+     * Reactivates a previously deactivated expectation.
+     */
+    public void activate() {
+        this.active = true;
+    }
 }
