@@ -93,6 +93,7 @@ class AlignmentServiceImplTest {
 
         assertThrows(IllegalStateException.class, () -> service.create(
                 new AlignmentExpectationCreateRequest(contractId, "Test", null, "WARNING", "x > 0")));
+        verify(repository, never()).save(any());
     }
 
     @Test
@@ -102,6 +103,7 @@ class AlignmentServiceImplTest {
 
         assertThrows(IllegalArgumentException.class, () -> service.create(
                 new AlignmentExpectationCreateRequest(contractId, "Test", null, "INVALID", "x > 0")));
+        verify(repository, never()).save(any());
     }
 
     @Test
@@ -111,6 +113,7 @@ class AlignmentServiceImplTest {
 
         assertThrows(IllegalArgumentException.class, () -> service.create(
                 new AlignmentExpectationCreateRequest(contractId, "Test", null, "  ", "x > 0")));
+        verify(repository, never()).save(any());
     }
 
     @Test
@@ -121,8 +124,6 @@ class AlignmentServiceImplTest {
         when(repository.save(any())).thenAnswer(inv -> inv.getArgument(0));
 
         assertFalse(service.deactivate(e.getId()).active());
-
-        e.setActive(false);
         assertTrue(service.activate(e.getId()).active());
     }
 
@@ -151,5 +152,7 @@ class AlignmentServiceImplTest {
         TenantContext.clear();
         assertThrows(IllegalStateException.class, () -> service.create(
                 new AlignmentExpectationCreateRequest(contractId, "Test", null, "WARNING", "x > 0")));
+        verifyNoInteractions(dataContractService);
+        verify(repository, never()).save(any());
     }
 }
