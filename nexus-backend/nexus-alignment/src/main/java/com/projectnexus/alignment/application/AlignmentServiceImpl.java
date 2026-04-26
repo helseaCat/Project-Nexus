@@ -74,10 +74,22 @@ public class AlignmentServiceImpl implements AlignmentService {
     public AlignmentExpectationResponse update(UUID id, AlignmentExpectationUpdateRequest request) {
         AlignmentExpectation expectation = findByIdForTenant(id);
 
-        if (request.name() != null) expectation.setName(request.name());
+        if (request.name() != null) {
+            String name = request.name().trim();
+            if (name.isEmpty()) {
+                throw new IllegalArgumentException("Expectation name cannot be blank");
+            }
+            expectation.setName(name);
+        }
         if (request.description() != null) expectation.setDescription(request.description());
         if (request.severity() != null) expectation.setSeverity(parseSeverity(request.severity()));
-        if (request.ruleExpression() != null) expectation.setRuleExpression(request.ruleExpression());
+        if (request.ruleExpression() != null) {
+            String rule = request.ruleExpression().trim();
+            if (rule.isEmpty()) {
+                throw new IllegalArgumentException("Rule expression cannot be blank");
+            }
+            expectation.setRuleExpression(rule);
+        }
 
         return toResponse(repository.save(expectation));
     }
@@ -112,8 +124,11 @@ public class AlignmentServiceImpl implements AlignmentService {
     }
 
     private Severity parseSeverity(String severity) {
+        if (severity == null || severity.isBlank()) {
+            throw new IllegalArgumentException("Severity is required. Must be WARNING or CRITICAL.");
+        }
         try {
-            return Severity.valueOf(severity.toUpperCase());
+            return Severity.valueOf(severity.trim().toUpperCase());
         } catch (IllegalArgumentException e) {
             throw new IllegalArgumentException("Invalid severity: '" + severity + "'. Must be WARNING or CRITICAL.");
         }
