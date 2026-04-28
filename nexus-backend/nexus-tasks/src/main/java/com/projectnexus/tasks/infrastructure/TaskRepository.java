@@ -27,5 +27,5 @@ public interface TaskRepository extends JpaRepository<Task, UUID> {
 
     Page<Task> findByTenantIdAndAssigneeId(UUID tenantId, UUID assigneeId, Pageable pageable);
 
-    List<Task> findByLinkedToTypeAndLinkedToId(LinkType linkType, UUID linkedToId);
+    List<Task> findByTenantIdAndLinkedToTypeAndLinkedToId(UUID tenantId, LinkType linkType, UUID linkedToId);
 }

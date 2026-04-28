@@ -12,7 +12,7 @@ CREATE TABLE tasks (
     description     TEXT,
     status          VARCHAR(20)  NOT NULL DEFAULT 'TODO',
     assignee_id     UUID,
-    due_date        TIMESTAMPTZ,
+    due_date        TIMESTAMP,
     linked_to_type  VARCHAR(20),
     linked_to_id    UUID,
     ai_generated    BOOLEAN      NOT NULL DEFAULT FALSE,
@@ -46,6 +46,7 @@ CREATE TABLE comments (
     deleted_at  TIMESTAMPTZ
 );
 
-CREATE INDEX idx_comments_task ON comments (task_id);
+CREATE INDEX idx_comments_task        ON comments (task_id);
+CREATE INDEX idx_comments_tenant_task ON comments (tenant_id, task_id);
 
 SELECT enable_rls_for_table('comments');

@@ -57,8 +57,14 @@ public class Task extends BaseTenantEntity {
 
     /**
      * Transitions the task to a new status with basic workflow validation.
+     *
+     * <p>Allows flexible forward transitions (e.g., TODO → DONE is permitted).
+     * The only restriction is that completed tasks cannot be reopened.
      */
     public void transitionTo(TaskStatus newStatus) {
+        if (newStatus == null) {
+            throw new IllegalArgumentException("New status must not be null");
+        }
         if (this.status == TaskStatus.DONE && newStatus != TaskStatus.DONE) {
             throw new IllegalStateException("Cannot reopen a completed task");
         }
