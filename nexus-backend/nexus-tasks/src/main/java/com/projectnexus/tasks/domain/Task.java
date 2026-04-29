@@ -2,6 +2,7 @@ package com.projectnexus.tasks.domain;
 
 import com.projectnexus.common.entity.BaseTenantEntity;
 import jakarta.persistence.*;
+import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
@@ -36,6 +37,7 @@ public class Task extends BaseTenantEntity {
     private String description;
 
     @Enumerated(EnumType.STRING)
+    @Setter(AccessLevel.NONE)
     @Column(nullable = false, length = 20)
     private TaskStatus status = TaskStatus.TODO;
 
