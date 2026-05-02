@@ -35,12 +35,15 @@ public class TaskServiceImpl implements TaskService {
 
         Task task = new Task();
         task.setTenantId(tenantId);
-        task.setTitle(request.title());
+        task.setTitle(validateTitle(request.title()));
         task.setDescription(request.description());
         task.setAssigneeId(request.assigneeId());
         task.setDueDate(request.dueDate());
 
-        if (request.linkedToType() != null) {
+        if (request.linkedToType() != null || request.linkedToId() != null) {
+            if (request.linkedToType() == null || request.linkedToId() == null) {
+                throw new IllegalArgumentException("Both linkedToType and linkedToId must be provided together");
+            }
             task.setLinkedToType(parseLinkType(request.linkedToType()));
             task.setLinkedToId(request.linkedToId());
         }
@@ -73,11 +76,7 @@ public class TaskServiceImpl implements TaskService {
         Task task = findByIdForTenant(id);
 
         if (request.title() != null) {
-            String title = request.title().trim();
-            if (title.isEmpty()) {
-                throw new IllegalArgumentException("Task title cannot be blank");
-            }
-            task.setTitle(title);
+            task.setTitle(validateTitle(request.title()));
         }
         if (request.description() != null) task.setDescription(request.description());
         if (request.assigneeId() != null) task.setAssigneeId(request.assigneeId());
@@ -108,6 +107,13 @@ public class TaskServiceImpl implements TaskService {
                 t.getLinkedToType() != null ? t.getLinkedToType().name() : null,
                 t.getLinkedToId(), t.isAiGenerated(),
                 t.getCreatedAt(), t.getUpdatedAt(), t.getCreatedBy());
+    }
+
+    private String validateTitle(String title) {
+        if (title == null || title.isBlank()) {
+            throw new IllegalArgumentException("Task title cannot be blank");
+        }
+        return title.trim();
     }
 
     private TaskStatus parseTaskStatus(String status) {
