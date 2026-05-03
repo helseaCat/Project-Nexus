@@ -3,7 +3,6 @@ package com.projectnexus.tasks.application;
 import com.projectnexus.common.exception.ResourceNotFoundException;
 import com.projectnexus.common.tenant.TenantContext;
 import com.projectnexus.tasks.application.dto.TaskCreateRequest;
-import com.projectnexus.tasks.application.dto.TaskUpdateRequest;
 import com.projectnexus.tasks.domain.Task;
 import com.projectnexus.tasks.domain.TaskStatus;
 import com.projectnexus.tasks.infrastructure.TaskRepository;
@@ -45,6 +44,9 @@ class TaskServiceImplTest {
         t.setId(UUID.randomUUID());
         t.setTenantId(tenantId);
         t.setTitle("Investigate pressure anomaly");
+        if (status != TaskStatus.TODO) {
+            t.transitionTo(status);
+        }
         return t;
     }
 
