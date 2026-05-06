@@ -1,5 +1,7 @@
 package com.projectnexus.ingestion.application.dto;
 
+import com.projectnexus.alignment.domain.PayloadStatus;
+
 import java.time.Instant;
 import java.util.UUID;
 
@@ -10,7 +12,7 @@ public record PayloadResponse(
         UUID id,
         UUID tenantId,
         UUID dataContractId,
-        String status,
+        PayloadStatus status,
         String s3Key,
         Instant createdAt,
         Instant updatedAt

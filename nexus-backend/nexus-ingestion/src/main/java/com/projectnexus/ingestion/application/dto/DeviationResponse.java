@@ -1,5 +1,7 @@
 package com.projectnexus.ingestion.application.dto;
 
+import com.projectnexus.alignment.domain.Severity;
+
 import java.time.Instant;
 import java.util.UUID;
 
@@ -11,7 +13,7 @@ public record DeviationResponse(
         UUID payloadId,
         UUID expectationId,
         UUID dataContractId,
-        String severity,
+        Severity severity,
         String description,
         String detectedValue,
         String expectedValue,
