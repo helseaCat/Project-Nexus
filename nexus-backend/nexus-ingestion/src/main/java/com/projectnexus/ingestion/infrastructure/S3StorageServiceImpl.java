@@ -4,9 +4,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import software.amazon.awssdk.core.exception.SdkClientException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.S3Exception;
 
 import java.nio.charset.StandardCharsets;
 import java.util.Optional;
@@ -46,9 +48,8 @@ public class S3StorageServiceImpl implements S3StorageService {
 
             log.debug("Uploaded payload to S3: bucket={}, key={}", bucketName, key);
             return Optional.of(key);
-        } catch (Exception e) {
-            log.error("Failed to upload payload to S3: bucket={}, key={}, error={}",
-                    bucketName, key, e.getMessage());
+        } catch (S3Exception | SdkClientException e) {
+            log.error("Failed to upload payload to S3: bucket={}, key={}", bucketName, key, e);
             return Optional.empty();
         }
     }
