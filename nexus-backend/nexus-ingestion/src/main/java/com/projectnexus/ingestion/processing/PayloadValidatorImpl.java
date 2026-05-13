@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 
 /**
@@ -65,7 +66,7 @@ public class PayloadValidatorImpl implements PayloadValidator {
             log.warn("Declared type is null or blank, failing type check");
             return false;
         }
-        return switch (declaredType.toUpperCase()) {
+        return switch (declaredType.toUpperCase(Locale.ROOT)) {
             case "DOUBLE" -> value instanceof Number;
             case "INTEGER" -> value instanceof Integer || value instanceof Long;
             case "STRING" -> value instanceof String;
