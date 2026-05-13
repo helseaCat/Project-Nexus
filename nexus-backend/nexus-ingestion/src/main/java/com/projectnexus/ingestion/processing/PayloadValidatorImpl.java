@@ -23,9 +23,15 @@ public class PayloadValidatorImpl implements PayloadValidator {
 
     @Override
     public List<Violation> validate(Map<String, Object> rawPayload, List<TestVariable> testVariables) {
+        if (rawPayload == null || testVariables == null) {
+            return List.of();
+        }
         List<Violation> violations = new ArrayList<>();
 
         for (TestVariable variable : testVariables) {
+            if (variable == null || variable.getName() == null) {
+                continue;
+            }
             String fieldName = variable.getName();
 
             if (!rawPayload.containsKey(fieldName)) {
@@ -53,14 +59,18 @@ public class PayloadValidatorImpl implements PayloadValidator {
         if (value == null) {
             return false;
         }
+        if (declaredType == null || declaredType.isBlank()) {
+            log.warn("Declared type is null or blank, failing type check");
+            return false;
+        }
         return switch (declaredType.toUpperCase()) {
             case "DOUBLE" -> value instanceof Number;
             case "INTEGER" -> value instanceof Integer || value instanceof Long;
             case "STRING" -> value instanceof String;
             case "BOOLEAN" -> value instanceof Boolean;
             default -> {
-                log.warn("Unknown declared type '{}', skipping type check", declaredType);
-                yield true;
+                log.warn("Unknown declared type '{}', failing type check", declaredType);
+                yield false;
             }
         };
     }
