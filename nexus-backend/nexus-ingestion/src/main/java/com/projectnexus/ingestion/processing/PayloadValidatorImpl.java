@@ -7,6 +7,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 
@@ -23,9 +24,10 @@ public class PayloadValidatorImpl implements PayloadValidator {
 
     @Override
     public List<Violation> validate(Map<String, Object> rawPayload, List<TestVariable> testVariables) {
-        if (rawPayload == null || testVariables == null) {
+        if (testVariables == null) {
             return List.of();
         }
+        Map<String, Object> payload = rawPayload == null ? Collections.emptyMap() : rawPayload;
         List<Violation> violations = new ArrayList<>();
 
         for (TestVariable variable : testVariables) {
@@ -34,12 +36,12 @@ public class PayloadValidatorImpl implements PayloadValidator {
             }
             String fieldName = variable.getName();
 
-            if (!rawPayload.containsKey(fieldName)) {
+            if (!payload.containsKey(fieldName)) {
                 violations.add(missingFieldViolation(fieldName));
                 continue;
             }
 
-            Object value = rawPayload.get(fieldName);
+            Object value = payload.get(fieldName);
             String declaredType = variable.getDataType();
 
             if (!isTypeMatch(value, declaredType)) {
