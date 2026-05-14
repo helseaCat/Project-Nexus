@@ -30,13 +30,13 @@ import java.util.regex.Pattern;
 public class RuleBasedDetector {
 
     private static final Pattern LESS_THAN_PATTERN = Pattern.compile(
-            "^\\s*(\\w+)\\s*<\\s*(-?[\\d.]+)\\s*$");
+            "^\\s*(\\w+)\\s*<\\s*(-?\\d+(?:\\.\\d+)?)\\s*$");
 
     private static final Pattern GREATER_THAN_PATTERN = Pattern.compile(
-            "^\\s*(\\w+)\\s*>\\s*(-?[\\d.]+)\\s*$");
+            "^\\s*(\\w+)\\s*>\\s*(-?\\d+(?:\\.\\d+)?)\\s*$");
 
     private static final Pattern BETWEEN_PATTERN = Pattern.compile(
-            "^\\s*(\\w+)\\s+BETWEEN\\s+(-?[\\d.]+)\\s+AND\\s+(-?[\\d.]+)\\s*$",
+            "^\\s*(\\w+)\\s+BETWEEN\\s+(-?\\d+(?:\\.\\d+)?)\\s+AND\\s+(-?\\d+(?:\\.\\d+)?)\\s*$",
             Pattern.CASE_INSENSITIVE);
 
     private static final Pattern EQUALITY_PATTERN = Pattern.compile(
@@ -135,6 +135,11 @@ public class RuleBasedDetector {
         String fieldName = matcher.group(1);
         double min = Double.parseDouble(matcher.group(2));
         double max = Double.parseDouble(matcher.group(3));
+
+        if (min > max) {
+            log.warn("Malformed BETWEEN expression '{}': min ({}) > max ({}), skipping", expression, min, max);
+            return Optional.empty();
+        }
 
         Optional<Double> fieldValue = extractNumericValue(fieldName, payload, expression);
         if (fieldValue.isEmpty()) {

@@ -26,6 +26,10 @@ public class ExpectationEvaluatorImpl implements ExpectationEvaluator {
 
     @Override
     public List<Violation> evaluate(Map<String, Object> rawPayload, List<AlignmentExpectation> expectations) {
+        if (rawPayload == null) {
+            log.warn("rawPayload is null, returning empty violations");
+            return List.of();
+        }
         if (expectations == null || expectations.isEmpty()) {
             return List.of();
         }
