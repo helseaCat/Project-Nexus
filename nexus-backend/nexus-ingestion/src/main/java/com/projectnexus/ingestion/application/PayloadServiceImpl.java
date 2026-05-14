@@ -20,7 +20,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.TransactionSynchronization;
+import org.springframework.transaction.support.TransactionSynchronizationManager;
 
+import java.util.Optional;
 import java.util.UUID;
 
 /**
@@ -63,18 +66,28 @@ public class PayloadServiceImpl implements PayloadService {
 
         Payload saved = payloadRepository.save(payload);
 
-        // Best-effort S3 upload
-        String jsonContent = serializePayload(request.rawPayload());
-        s3StorageService.upload(tenantId, request.dataContractId(), saved.getId(), jsonContent)
-                .ifPresent(key -> {
-                    saved.setS3Key(key);
-                    payloadRepository.save(saved);
-                });
+        // Schedule side effects after transaction commits
+        UUID payloadId = saved.getId();
+        UUID contractId = request.dataContractId();
+        Optional<String> jsonContent = serializePayload(request.rawPayload());
 
-        // Publish to RabbitMQ for async processing
-        var message = new IngestionMessage(saved.getId(), tenantId);
-        rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY, message);
-        log.info("Submitted payload id={} for contract={} tenant={}", saved.getId(), request.dataContractId(), tenantId);
+        TransactionSynchronizationManager.registerSynchronization(new TransactionSynchronization() {
+            @Override
+            public void afterCommit() {
+                // Best-effort S3 upload
+                jsonContent.flatMap(content ->
+                        s3StorageService.upload(tenantId, contractId, payloadId, content))
+                        .ifPresent(key -> {
+                            saved.setS3Key(key);
+                            payloadRepository.save(saved);
+                        });
+
+                // Publish to RabbitMQ for async processing
+                var message = new IngestionMessage(payloadId, tenantId);
+                rabbitTemplate.convertAndSend(EXCHANGE, ROUTING_KEY, message);
+                log.info("Submitted payload id={} for contract={} tenant={}", payloadId, contractId, tenantId);
+            }
+        });
 
         return toResponse(saved);
     }
@@ -120,12 +133,12 @@ public class PayloadServiceImpl implements PayloadService {
         return tenantId;
     }
 
-    private String serializePayload(Object rawPayload) {
+    private Optional<String> serializePayload(Object rawPayload) {
         try {
-            return objectMapper.writeValueAsString(rawPayload);
+            return Optional.of(objectMapper.writeValueAsString(rawPayload));
         } catch (JsonProcessingException e) {
-            log.warn("Failed to serialize payload for S3, using toString()", e);
-            return rawPayload.toString();
+            log.warn("Failed to serialize payload for S3; skipping upload", e);
+            return Optional.empty();
         }
     }
 
