@@ -43,7 +43,10 @@ public class RabbitMQConfig {
 
     @Bean
     public Queue deadLetterQueue() {
-        return QueueBuilder.durable(DLQ).build();
+        return QueueBuilder.durable(DLQ)
+                .withArgument("x-message-ttl", 604_800_000)  // 7 days retention
+                .withArgument("x-max-length", 10_000)        // Max 10k messages
+                .build();
     }
 
     @Bean
