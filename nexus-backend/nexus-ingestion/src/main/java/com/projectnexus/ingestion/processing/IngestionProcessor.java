@@ -46,6 +46,7 @@ public class IngestionProcessor {
     private final PayloadValidator payloadValidator;
     private final ExpectationEvaluator expectationEvaluator;
     private final DeviationRecorder deviationRecorder;
+    private final PayloadFailureLogger failureLogger;
     private final ObjectMapper objectMapper;
 
     @RabbitListener(queues = "nexus.payloads.ingestion")
@@ -63,6 +64,12 @@ public class IngestionProcessor {
                     .orElse(null);
             if (payload == null) {
                 log.warn("Payload id={} not found for tenant={}, acknowledging message", payloadId, tenantId);
+                return;
+            }
+
+            // Idempotency guard — skip if already processed (redelivery)
+            if (payload.getStatus() != PayloadStatus.PENDING) {
+                log.info("Skipping payload id={} with status={} (already processed)", payloadId, payload.getStatus());
                 return;
             }
 
@@ -108,16 +115,7 @@ public class IngestionProcessor {
 
         } catch (Exception e) {
             log.error("Unexpected error processing payload id={}: {}", payloadId, e.getMessage(), e);
-            // Attempt to mark as FAILED
-            try {
-                payloadRepository.findByIdAndTenantId(payloadId, tenantId)
-                        .ifPresent(p -> {
-                            p.setStatus(PayloadStatus.FAILED);
-                            payloadRepository.save(p);
-                        });
-            } catch (Exception inner) {
-                log.error("Failed to mark payload as FAILED: {}", inner.getMessage());
-            }
+            failureLogger.markFailed(payloadId, tenantId);
             throw e; // Re-throw for RabbitMQ retry/DLQ handling
         } finally {
             TenantContext.clear();
@@ -132,8 +130,7 @@ public class IngestionProcessor {
         try {
             return objectMapper.convertValue(rawPayload, Map.class);
         } catch (Exception e) {
-            log.warn("Failed to parse rawPayload to Map, returning empty: {}", e.getMessage());
-            return Map.of();
+            throw new IllegalArgumentException("Invalid rawPayload format", e);
         }
     }
 }
