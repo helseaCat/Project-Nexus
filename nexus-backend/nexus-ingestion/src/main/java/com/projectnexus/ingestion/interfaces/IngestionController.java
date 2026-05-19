@@ -8,11 +8,14 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springdoc.core.annotations.ParameterObject;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
+import java.net.URI;
 import java.util.UUID;
 
 /**
@@ -27,10 +30,14 @@ public class IngestionController {
     private final PayloadService payloadService;
 
     @PostMapping
-    @ResponseStatus(HttpStatus.CREATED)
     @Operation(summary = "Submit a payload", description = "Submit a data payload against a published Data Contract for async validation")
-    public PayloadResponse submit(@Valid @RequestBody PayloadSubmitRequest request) {
-        return payloadService.submit(request);
+    public ResponseEntity<PayloadResponse> submit(@Valid @RequestBody PayloadSubmitRequest request) {
+        PayloadResponse response = payloadService.submit(request);
+        URI location = ServletUriComponentsBuilder.fromCurrentRequest()
+                .path("/{id}")
+                .buildAndExpand(response.id())
+                .toUri();
+        return ResponseEntity.created(location).body(response);
     }
 
     @GetMapping("/{id}")
@@ -41,19 +48,19 @@ public class IngestionController {
 
     @GetMapping("/by-contract/{contractId}")
     @Operation(summary = "List payloads by contract", description = "Paginated list of payloads submitted against a specific contract")
-    public Page<PayloadResponse> listByContract(@PathVariable UUID contractId, Pageable pageable) {
+    public Page<PayloadResponse> listByContract(@PathVariable UUID contractId, @ParameterObject Pageable pageable) {
         return payloadService.listByContract(contractId, pageable);
     }
 
     @GetMapping("/{id}/deviations")
     @Operation(summary = "Get deviations for a payload", description = "Paginated list of deviations detected for a specific payload")
-    public Page<DeviationResponse> getDeviationsForPayload(@PathVariable UUID id, Pageable pageable) {
+    public Page<DeviationResponse> getDeviationsForPayload(@PathVariable UUID id, @ParameterObject Pageable pageable) {
         return payloadService.getDeviationsForPayload(id, pageable);
     }
 
     @GetMapping("/deviations/by-contract/{contractId}")
     @Operation(summary = "List deviations by contract", description = "Paginated list of all deviations for payloads under a specific contract")
-    public Page<DeviationResponse> listDeviationsByContract(@PathVariable UUID contractId, Pageable pageable) {
+    public Page<DeviationResponse> listDeviationsByContract(@PathVariable UUID contractId, @ParameterObject Pageable pageable) {
         return payloadService.listDeviationsByContract(contractId, pageable);
     }
 }
