@@ -52,3 +52,6 @@ logs/
 # === Test / Coverage ===
 coverage/
 *.lcov
+
+# Kiro clipboard (transient paste content)
+.kiro/clipboard.md
