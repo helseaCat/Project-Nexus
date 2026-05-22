@@ -19,7 +19,7 @@
   }
 
   body {
-    @apply min-h-screen bg-gray-50 text-sm;
+    @apply min-h-screen bg-gray-50;
   }
 
   *:focus-visible {
