@@ -29,11 +29,17 @@ export const ROUTES = {
 
 /**
  * Helper to build parameterized routes.
+ * Throws if a required param is missing.
  */
-export function buildRoute(route: string, params: Record<string, string>): string {
-  let result = route;
-  for (const [key, value] of Object.entries(params)) {
-    result = result.replace(`:${key}`, value);
-  }
-  return result;
+export function buildRoute(
+  route: string,
+  params: Record<string, string | number>
+): string {
+  return route.replace(/:([A-Za-z0-9_]+)/g, (_match, key: string) => {
+    const raw = params[key];
+    if (raw === undefined || raw === null) {
+      throw new Error(`Missing route param: ${key}`);
+    }
+    return encodeURIComponent(String(raw));
+  });
 }
