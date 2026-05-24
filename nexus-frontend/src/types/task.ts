@@ -17,11 +17,13 @@ export interface Task {
   createdBy: string;
 }
 
-export interface CreateTaskRequest {
+type TaskLink =
+  | { linkedToType: LinkedEntityType; linkedToId: string }
+  | { linkedToType?: undefined; linkedToId?: undefined };
+
+export type CreateTaskRequest = {
   title: string;
   description?: string;
   assigneeId?: string;
   dueDate?: string;
-  linkedToType?: LinkedEntityType;
-  linkedToId?: string;
-}
+} & TaskLink;
