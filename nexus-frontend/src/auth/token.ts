@@ -23,7 +23,22 @@ export function decodeToken(token: string): JwtClaims | null {
   try {
     const payload = token.split('.')[1];
     if (!payload) return null;
-    return JSON.parse(atob(payload)) as JwtClaims;
+    // Convert base64url to standard base64
+    const normalized = payload.replace(/-/g, '+').replace(/_/g, '/');
+    const padded = normalized.padEnd(Math.ceil(normalized.length / 4) * 4, '=');
+    const parsed: unknown = JSON.parse(atob(padded));
+    // Validate claims shape
+    if (
+      typeof parsed === 'object' &&
+      parsed !== null &&
+      typeof (parsed as Record<string, unknown>).sub === 'string' &&
+      typeof (parsed as Record<string, unknown>).tenant_id === 'string' &&
+      Array.isArray((parsed as Record<string, unknown>).roles) &&
+      Number.isFinite((parsed as Record<string, unknown>).exp)
+    ) {
+      return parsed as JwtClaims;
+    }
+    return null;
   } catch {
     return null;
   }
@@ -31,6 +46,6 @@ export function decodeToken(token: string): JwtClaims | null {
 
 export function isTokenExpired(token: string): boolean {
   const claims = decodeToken(token);
-  if (!claims) return true;
+  if (!claims || !Number.isFinite(claims.exp)) return true;
   return Date.now() >= claims.exp * 1000;
 }

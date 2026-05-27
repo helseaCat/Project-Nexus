@@ -1,4 +1,4 @@
-import { createContext, useCallback, useMemo, type ReactNode } from 'react';
+import { createContext, useCallback, useMemo, useState, type ReactNode } from 'react';
 import { getToken, setToken, clearToken, decodeToken, isTokenExpired } from './token';
 
 export interface AuthUser {
@@ -16,28 +16,36 @@ export interface AuthContextValue {
 
 export const AuthContext = createContext<AuthContextValue | null>(null);
 
+function resolveUser(): AuthUser | null {
+  const token = getToken();
+  if (!token || isTokenExpired(token)) {
+    clearToken();
+    return null;
+  }
+  const claims = decodeToken(token);
+  if (!claims) return null;
+  return { userId: claims.sub, tenantId: claims.tenant_id, roles: claims.roles };
+}
+
 export function AuthProvider({ children }: { children: ReactNode }) {
-  const getUser = useCallback((): AuthUser | null => {
-    const token = getToken();
-    if (!token || isTokenExpired(token)) {
-      clearToken();
-      return null;
-    }
-    const claims = decodeToken(token);
-    if (!claims) return null;
-    return { userId: claims.sub, tenantId: claims.tenant_id, roles: claims.roles };
-  }, []);
+  const [user, setUser] = useState<AuthUser | null>(() => resolveUser());
 
   const login = useCallback((token: string) => {
     setToken(token);
+    const claims = decodeToken(token);
+    if (!claims || isTokenExpired(token)) {
+      clearToken();
+      setUser(null);
+      return;
+    }
+    setUser({ userId: claims.sub, tenantId: claims.tenant_id, roles: claims.roles });
   }, []);
 
   const logout = useCallback(() => {
     clearToken();
+    setUser(null);
     window.location.href = '/login';
   }, []);
-
-  const user = getUser();
 
   const value = useMemo<AuthContextValue>(() => ({
     user,
