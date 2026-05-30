@@ -23,7 +23,10 @@ export function useSubmitPayload() {
   const qc = useQueryClient();
   return useMutation({
     mutationFn: (data: SubmitPayloadRequest) => payloadsApi.submit(data),
-    onSuccess: () => qc.invalidateQueries({ queryKey: ['payloads'] }),
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: ['payloads'] });
+      qc.invalidateQueries({ queryKey: ['deviations'] });
+    },
   });
 }
 
