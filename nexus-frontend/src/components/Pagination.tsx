@@ -14,6 +14,7 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
       </p>
       <div className="flex gap-2">
         <button
+          type="button"
           onClick={() => onPageChange(currentPage - 1)}
           disabled={currentPage === 0}
           className="btn-secondary text-sm"
@@ -22,6 +23,7 @@ export function Pagination({ currentPage, totalPages, onPageChange }: Pagination
           Previous
         </button>
         <button
+          type="button"
           onClick={() => onPageChange(currentPage + 1)}
           disabled={currentPage >= totalPages - 1}
           className="btn-secondary text-sm"

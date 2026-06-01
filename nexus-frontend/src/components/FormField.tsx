@@ -6,7 +6,7 @@ interface FormFieldProps extends InputHTMLAttributes<HTMLInputElement> {
 }
 
 export function FormField({ label, error, id, className = '', ...props }: FormFieldProps) {
-  const fieldId = id ?? label.toLowerCase().replace(/\s+/g, '-');
+  const fieldId = id ?? `field-${label.toLowerCase().replace(/\s+/g, '-').replace(/[^a-z0-9-]/g, '')}`;
   return (
     <div className="mb-4">
       <label htmlFor={fieldId} className="label">{label}</label>
