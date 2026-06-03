@@ -38,6 +38,9 @@ export default function App() {
                 <Route path={ROUTES.PAYLOAD_DETAIL} element={<Placeholder name="Payload Detail" />} />
                 <Route path={ROUTES.PAYLOAD_SUBMIT} element={<Placeholder name="Submit Payload" />} />
                 <Route path={ROUTES.DEVIATIONS} element={<Placeholder name="Deviations" />} />
+                <Route path={ROUTES.CONTRACT_EDIT} element={<Placeholder name="Edit Contract" />} />
+                <Route path={ROUTES.EXPECTATION_EDIT} element={<Placeholder name="Edit Expectation" />} />
+                <Route path="*" element={<Placeholder name="Page Not Found" />} />
               </Route>
             </Route>
           </Routes>
