@@ -1,5 +1,5 @@
 import { useNavigate } from 'react-router-dom';
-import { useContracts } from '@/hooks/useContracts';
+import { useContracts, usePublishedContracts } from '@/hooks/useContracts';
 import { useTasks } from '@/hooks/useTasks';
 import { MetricCard } from '@/components/MetricCard';
 import { StatusBadge } from '@/components/StatusBadge';
@@ -9,15 +9,18 @@ import { ROUTES } from '@/utils/routes';
 
 export function DashboardPage() {
   const navigate = useNavigate();
-  const contracts = useContracts({ page: 0, size: 100 });
+  const contracts = useContracts({ page: 0, size: 1 });
+  const published = usePublishedContracts({ page: 0, size: 1 });
   const tasks = useTasks({ page: 0, size: 5, sort: 'createdAt,desc' });
 
-  if (contracts.isLoading || tasks.isLoading) return <LoadingSpinner />;
+  if (contracts.isLoading || published.isLoading || tasks.isLoading) return <LoadingSpinner />;
   if (contracts.error) return <ErrorMessage message="Failed to load contracts" onRetry={() => contracts.refetch()} />;
+  if (published.error) return <ErrorMessage message="Failed to load contracts" onRetry={() => published.refetch()} />;
+  if (tasks.error) return <ErrorMessage message="Failed to load tasks" onRetry={() => tasks.refetch()} />;
 
-  const contractData = contracts.data;
-  const draftCount = contractData?.content.filter(c => c.status === 'DRAFT').length ?? 0;
-  const publishedCount = contractData?.content.filter(c => c.status === 'PUBLISHED').length ?? 0;
+  const totalContracts = contracts.data?.totalElements ?? 0;
+  const publishedCount = published.data?.totalElements ?? 0;
+  const draftCount = totalContracts - publishedCount;
 
   const recentTasks = tasks.data?.content ?? [];
 
@@ -39,7 +42,7 @@ export function DashboardPage() {
           />
           <MetricCard
             title="Total Contracts"
-            value={contractData?.totalElements ?? 0}
+            value={totalContracts}
             onClick={() => navigate(ROUTES.CONTRACTS)}
           />
           <MetricCard
