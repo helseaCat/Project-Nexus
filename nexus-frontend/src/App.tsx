@@ -4,6 +4,7 @@ import { AuthProvider } from '@/auth/AuthProvider';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { AppShell } from '@/layout/AppShell';
 import { DashboardPage } from '@/pages/DashboardPage';
+import { ContractListPage } from '@/pages/contracts/ContractListPage';
 import { ROUTES } from '@/utils/routes';
 
 const queryClient = new QueryClient({
@@ -26,7 +27,7 @@ export default function App() {
             <Route element={<ProtectedRoute />}>
               <Route element={<AppShell />}>
                 <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
-                <Route path={ROUTES.CONTRACTS} element={<Placeholder name="Contracts" />} />
+                <Route path={ROUTES.CONTRACTS} element={<ContractListPage />} />
                 <Route path={ROUTES.CONTRACT_DETAIL} element={<Placeholder name="Contract Detail" />} />
                 <Route path={ROUTES.CONTRACT_CREATE} element={<Placeholder name="Create Contract" />} />
                 <Route path={ROUTES.EXPECTATIONS} element={<Placeholder name="Expectations" />} />
