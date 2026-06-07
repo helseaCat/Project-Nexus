@@ -3,6 +3,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { AuthProvider } from '@/auth/AuthProvider';
 import { ProtectedRoute } from '@/components/ProtectedRoute';
 import { AppShell } from '@/layout/AppShell';
+import { DashboardPage } from '@/pages/DashboardPage';
 import { ROUTES } from '@/utils/routes';
 
 const queryClient = new QueryClient({
@@ -24,7 +25,7 @@ export default function App() {
             <Route path={ROUTES.LOGIN} element={<Placeholder name="Login" />} />
             <Route element={<ProtectedRoute />}>
               <Route element={<AppShell />}>
-                <Route path={ROUTES.DASHBOARD} element={<Placeholder name="Dashboard" />} />
+                <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
                 <Route path={ROUTES.CONTRACTS} element={<Placeholder name="Contracts" />} />
                 <Route path={ROUTES.CONTRACT_DETAIL} element={<Placeholder name="Contract Detail" />} />
                 <Route path={ROUTES.CONTRACT_CREATE} element={<Placeholder name="Create Contract" />} />

@@ -11,6 +11,14 @@ export function useContracts(params: PaginationParams) {
   });
 }
 
+export function usePublishedContracts(params: PaginationParams) {
+  return useQuery({
+    queryKey: ['contracts', 'published', params],
+    queryFn: () => contractsApi.listPublished(params),
+    staleTime: 30_000,
+  });
+}
+
 export function useContract(id: string) {
   return useQuery({
     queryKey: ['contracts', id],
