@@ -31,7 +31,7 @@ export function DataTable<T>({
 
   return (
     <div className="overflow-x-auto rounded-md border border-gray-200 bg-white">
-      <table className="min-w-full divide-y divide-gray-200" role="grid">
+      <table className="min-w-full divide-y divide-gray-200">
         <thead className="bg-gray-50">
           <tr>
             {columns.map((col) => (
@@ -61,7 +61,6 @@ export function DataTable<T>({
                   : undefined
               }
               tabIndex={onRowClick ? 0 : undefined}
-              role={onRowClick ? 'row' : undefined}
               className={onRowClick ? 'cursor-pointer hover:bg-gray-50 focus:bg-gray-50 focus:outline-none' : ''}
             >
               {columns.map((col) => (

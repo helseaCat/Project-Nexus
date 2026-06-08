@@ -18,7 +18,10 @@ const columns: Column<DataContract>[] = [
   {
     key: 'createdAt',
     header: 'Created',
-    render: (c) => new Date(c.createdAt).toLocaleDateString(),
+    render: (c) => {
+      const date = new Date(c.createdAt);
+      return Number.isNaN(date.getTime()) ? '—' : date.toLocaleDateString();
+    },
   },
 ];
 
