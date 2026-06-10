@@ -19,7 +19,11 @@ export function ContractDetailPage() {
   const isDraft = contract.status === 'DRAFT';
 
   async function handlePublish() {
-    await publishMutation.mutateAsync(contract!.id);
+    try {
+      await publishMutation.mutateAsync(contract!.id);
+    } catch {
+      // Error state is exposed via publishMutation.isError
+    }
   }
 
   return (
