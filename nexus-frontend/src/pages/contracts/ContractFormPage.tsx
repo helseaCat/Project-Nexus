@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react';
+import { useEffect, useState, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useContract, useCreateContract, useUpdateContract } from '@/hooks/useContracts';
 import { FormField } from '@/components/FormField';
@@ -9,12 +9,17 @@ import type { ApiError } from '@/types/api';
 import type { CreateContractRequest } from '@/types/contract';
 import axios from 'axios';
 
+function serializeJson(value: unknown): string {
+  if (value === null || value === undefined) return '';
+  return JSON.stringify(value, null, 2);
+}
+
 export function ContractFormPage() {
   const { id } = useParams<{ id: string }>();
   const isEdit = Boolean(id);
   const navigate = useNavigate();
 
-  const { data: existing, isLoading, error: loadError } = useContract(id ?? '');
+  const { data: existing, isLoading, error: loadError } = useContract(id ?? '', { enabled: isEdit });
   const createMutation = useCreateContract();
   const updateMutation = useUpdateContract();
 
@@ -23,16 +28,24 @@ export function ContractFormPage() {
   const [businessGoals, setBusinessGoals] = useState('');
   const [sharingRules, setSharingRules] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
-  const [initialized, setInitialized] = useState(false);
+  const [formError, setFormError] = useState('');
 
-  // Populate form when editing and data arrives
-  if (isEdit && existing && !initialized) {
-    setName(existing.name);
-    setDescription(existing.description);
-    setBusinessGoals(existing.businessGoals ? JSON.stringify(existing.businessGoals, null, 2) : '');
-    setSharingRules(existing.sharingRules ? JSON.stringify(existing.sharingRules, null, 2) : '');
-    setInitialized(true);
-  }
+  // Hydrate form when editing and data arrives, or reset for create mode
+  useEffect(() => {
+    if (isEdit && existing) {
+      setName(existing.name);
+      setDescription(existing.description);
+      setBusinessGoals(serializeJson(existing.businessGoals));
+      setSharingRules(serializeJson(existing.sharingRules));
+    } else if (!isEdit) {
+      setName('');
+      setDescription('');
+      setBusinessGoals('');
+      setSharingRules('');
+    }
+    setFieldErrors({});
+    setFormError('');
+  }, [isEdit, existing]);
 
   if (isEdit && isLoading) return <LoadingSpinner />;
   if (isEdit && loadError) {
@@ -44,12 +57,35 @@ export function ContractFormPage() {
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setFieldErrors({});
+    setFormError('');
+
+    // Validate JSON fields before submitting
+    let parsedGoals: unknown;
+    let parsedRules: unknown;
+
+    if (businessGoals.trim()) {
+      try {
+        parsedGoals = JSON.parse(businessGoals);
+      } catch {
+        setFieldErrors((prev) => ({ ...prev, businessGoals: 'Invalid JSON' }));
+        return;
+      }
+    }
+
+    if (sharingRules.trim()) {
+      try {
+        parsedRules = JSON.parse(sharingRules);
+      } catch {
+        setFieldErrors((prev) => ({ ...prev, sharingRules: 'Invalid JSON' }));
+        return;
+      }
+    }
 
     const payload: CreateContractRequest = {
       name: name.trim(),
       description: description.trim(),
-      businessGoals: businessGoals.trim() ? JSON.parse(businessGoals) : undefined,
-      sharingRules: sharingRules.trim() ? JSON.parse(sharingRules) : undefined,
+      businessGoals: parsedGoals,
+      sharingRules: parsedRules,
     };
 
     try {
@@ -65,7 +101,11 @@ export function ContractFormPage() {
         const apiError = err.response.data as ApiError;
         if (apiError.errors) {
           setFieldErrors(apiError.errors);
+        } else {
+          setFormError(apiError.message || 'An error occurred. Please try again.');
         }
+      } else {
+        setFormError('An unexpected error occurred. Please try again.');
       }
     }
   }
@@ -75,6 +115,10 @@ export function ContractFormPage() {
       <h1 className="text-2xl font-bold text-gray-900 mb-6">
         {isEdit ? 'Edit Contract' : 'Create Contract'}
       </h1>
+
+      {formError && (
+        <p className="mb-4 text-sm text-red-600" role="alert">{formError}</p>
+      )}
 
       <form onSubmit={handleSubmit} className="max-w-2xl space-y-1">
         <FormField
@@ -111,10 +155,13 @@ export function ContractFormPage() {
             value={businessGoals}
             onChange={(e) => setBusinessGoals(e.target.value)}
             aria-invalid={!!fieldErrors.businessGoals}
+            aria-describedby={fieldErrors.businessGoals ? 'businessGoals-error' : undefined}
             placeholder='e.g. ["Improve data quality"]'
           />
           {fieldErrors.businessGoals && (
-            <p className="mt-1 text-sm text-red-600" role="alert">{fieldErrors.businessGoals}</p>
+            <p id="businessGoals-error" className="mt-1 text-sm text-red-600" role="alert">
+              {fieldErrors.businessGoals}
+            </p>
           )}
         </div>
 
@@ -126,10 +173,13 @@ export function ContractFormPage() {
             value={sharingRules}
             onChange={(e) => setSharingRules(e.target.value)}
             aria-invalid={!!fieldErrors.sharingRules}
+            aria-describedby={fieldErrors.sharingRules ? 'sharingRules-error' : undefined}
             placeholder='e.g. {"visibility": "INTERNAL"}'
           />
           {fieldErrors.sharingRules && (
-            <p className="mt-1 text-sm text-red-600" role="alert">{fieldErrors.sharingRules}</p>
+            <p id="sharingRules-error" className="mt-1 text-sm text-red-600" role="alert">
+              {fieldErrors.sharingRules}
+            </p>
           )}
         </div>
 
