@@ -1,4 +1,4 @@
-import { useEffect, useState, type FormEvent } from 'react';
+import { useEffect, useRef, useState, type FormEvent } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useContract, useCreateContract, useUpdateContract } from '@/hooks/useContracts';
 import { FormField } from '@/components/FormField';
@@ -29,15 +29,19 @@ export function ContractFormPage() {
   const [sharingRules, setSharingRules] = useState('');
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formError, setFormError] = useState('');
+  const lastHydratedIdRef = useRef<string | null>(null);
 
   // Hydrate form when editing and data arrives, or reset for create mode
   useEffect(() => {
     if (isEdit && existing) {
+      if (lastHydratedIdRef.current === existing.id) return;
       setName(existing.name);
       setDescription(existing.description);
       setBusinessGoals(serializeJson(existing.businessGoals));
       setSharingRules(serializeJson(existing.sharingRules));
+      lastHydratedIdRef.current = existing.id;
     } else if (!isEdit) {
+      lastHydratedIdRef.current = null;
       setName('');
       setDescription('');
       setBusinessGoals('');
