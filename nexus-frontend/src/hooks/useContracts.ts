@@ -19,11 +19,12 @@ export function usePublishedContracts(params: PaginationParams) {
   });
 }
 
-export function useContract(id: string) {
+export function useContract(id: string, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ['contracts', id],
     queryFn: () => contractsApi.getById(id),
     staleTime: 30_000,
+    enabled: options?.enabled ?? true,
   });
 }
 

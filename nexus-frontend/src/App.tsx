@@ -6,6 +6,7 @@ import { AppShell } from '@/layout/AppShell';
 import { DashboardPage } from '@/pages/DashboardPage';
 import { ContractListPage } from '@/pages/contracts/ContractListPage';
 import { ContractDetailPage } from '@/pages/contracts/ContractDetailPage';
+import { ContractFormPage } from '@/pages/contracts/ContractFormPage';
 import { ROUTES } from '@/utils/routes';
 
 const queryClient = new QueryClient({
@@ -30,7 +31,7 @@ export default function App() {
                 <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
                 <Route path={ROUTES.CONTRACTS} element={<ContractListPage />} />
                 <Route path={ROUTES.CONTRACT_DETAIL} element={<ContractDetailPage />} />
-                <Route path={ROUTES.CONTRACT_CREATE} element={<Placeholder name="Create Contract" />} />
+                <Route path={ROUTES.CONTRACT_CREATE} element={<ContractFormPage />} />
                 <Route path={ROUTES.EXPECTATIONS} element={<Placeholder name="Expectations" />} />
                 <Route path={ROUTES.EXPECTATION_DETAIL} element={<Placeholder name="Expectation Detail" />} />
                 <Route path={ROUTES.EXPECTATION_CREATE} element={<Placeholder name="Create Expectation" />} />
@@ -41,7 +42,7 @@ export default function App() {
                 <Route path={ROUTES.PAYLOAD_DETAIL} element={<Placeholder name="Payload Detail" />} />
                 <Route path={ROUTES.PAYLOAD_SUBMIT} element={<Placeholder name="Submit Payload" />} />
                 <Route path={ROUTES.DEVIATIONS} element={<Placeholder name="Deviations" />} />
-                <Route path={ROUTES.CONTRACT_EDIT} element={<Placeholder name="Edit Contract" />} />
+                <Route path={ROUTES.CONTRACT_EDIT} element={<ContractFormPage />} />
                 <Route path={ROUTES.EXPECTATION_EDIT} element={<Placeholder name="Edit Expectation" />} />
                 <Route path="*" element={<Placeholder name="Page Not Found" />} />
               </Route>
