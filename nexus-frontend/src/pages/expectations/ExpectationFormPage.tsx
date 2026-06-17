@@ -15,7 +15,12 @@ export function ExpectationFormPage() {
   const isEdit = Boolean(id);
   const navigate = useNavigate();
 
-  const { data: existing, isLoading, error: loadError } = useExpectation(id ?? '', { enabled: isEdit });
+  const {
+    data: existing,
+    isLoading,
+    error: loadError,
+    refetch: refetchExpectation,
+  } = useExpectation(id ?? '', { enabled: isEdit });
   const contracts = usePublishedContracts({ page: 0, size: 100 });
   const createMutation = useCreateExpectation();
   const updateMutation = useUpdateExpectation();
@@ -52,7 +57,11 @@ export function ExpectationFormPage() {
 
   if (isEdit && isLoading) return <LoadingSpinner />;
   if (isEdit && loadError) {
-    return <ErrorMessage message="Failed to load expectation" onRetry={() => {}} />;
+    return <ErrorMessage message="Failed to load expectation" onRetry={() => refetchExpectation()} />;
+  }
+  if (!isEdit && contracts.isLoading) return <LoadingSpinner />;
+  if (!isEdit && contracts.error) {
+    return <ErrorMessage message="Failed to load published contracts" onRetry={() => contracts.refetch()} />;
   }
 
   const isPending = createMutation.isPending || updateMutation.isPending;
