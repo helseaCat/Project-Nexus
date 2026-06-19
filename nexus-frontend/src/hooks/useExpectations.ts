@@ -11,11 +11,12 @@ export function useExpectations(params: PaginationParams) {
   });
 }
 
-export function useExpectation(id: string) {
+export function useExpectation(id: string, options?: { enabled?: boolean }) {
   return useQuery({
     queryKey: ['expectations', id],
     queryFn: () => expectationsApi.getById(id),
     staleTime: 30_000,
+    enabled: options?.enabled ?? true,
   });
 }
 
