@@ -4,7 +4,7 @@ import type { TaskStatus } from '../types/task';
  * Defines the valid status transitions for tasks.
  * State machine: TODO → IN_PROGRESS → IN_REVIEW → DONE
  */
-const TRANSITION_MAP: Record<TaskStatus, TaskStatus[]> = {
+const TRANSITION_MAP: Readonly<Record<TaskStatus, readonly TaskStatus[]>> = {
   TODO: ['IN_PROGRESS'],
   IN_PROGRESS: ['IN_REVIEW'],
   IN_REVIEW: ['DONE'],
@@ -16,7 +16,7 @@ const TRANSITION_MAP: Record<TaskStatus, TaskStatus[]> = {
  * Returns an empty array if no transitions are available (terminal state).
  */
 export function getValidTransitions(currentStatus: TaskStatus): TaskStatus[] {
-  return TRANSITION_MAP[currentStatus] ?? [];
+  return [...(TRANSITION_MAP[currentStatus] ?? [])];
 }
 
 /**
