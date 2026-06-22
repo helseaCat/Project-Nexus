@@ -10,6 +10,7 @@ import { ContractFormPage } from '@/pages/contracts/ContractFormPage';
 import { ExpectationListPage } from '@/pages/expectations/ExpectationListPage';
 import { ExpectationDetailPage } from '@/pages/expectations/ExpectationDetailPage';
 import { ExpectationFormPage } from '@/pages/expectations/ExpectationFormPage';
+import { TaskListPage } from '@/pages/tasks/TaskListPage';
 import { ROUTES } from '@/utils/routes';
 
 const queryClient = new QueryClient({
@@ -38,7 +39,7 @@ export default function App() {
                 <Route path={ROUTES.EXPECTATIONS} element={<ExpectationListPage />} />
                 <Route path={ROUTES.EXPECTATION_DETAIL} element={<ExpectationDetailPage />} />
                 <Route path={ROUTES.EXPECTATION_CREATE} element={<ExpectationFormPage />} />
-                <Route path={ROUTES.TASKS} element={<Placeholder name="Tasks" />} />
+                <Route path={ROUTES.TASKS} element={<TaskListPage />} />
                 <Route path={ROUTES.TASK_DETAIL} element={<Placeholder name="Task Detail" />} />
                 <Route path={ROUTES.TASK_CREATE} element={<Placeholder name="Create Task" />} />
                 <Route path={ROUTES.PAYLOADS} element={<Placeholder name="Payloads" />} />
