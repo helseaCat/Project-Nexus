@@ -32,6 +32,14 @@ export function TaskFormPage() {
     setFieldErrors({});
     setFormError('');
 
+    if (linkedToType && !linkedToId.trim()) {
+      setFieldErrors((prev) => ({
+        ...prev,
+        linkedToId: 'Linked entity ID is required when a type is selected.',
+      }));
+      return;
+    }
+
     const base = {
       title: title.trim(),
       ...(description.trim() && { description: description.trim() }),
@@ -40,7 +48,7 @@ export function TaskFormPage() {
     };
 
     const payload: Parameters<typeof createMutation.mutateAsync>[0] =
-      linkedToType && linkedToId.trim()
+      linkedToType
         ? { ...base, linkedToType, linkedToId: linkedToId.trim() }
         : base;
 
@@ -125,14 +133,21 @@ export function TaskFormPage() {
           <label htmlFor="linkedToType" className="label">Linked Entity Type</label>
           <select
             id="linkedToType"
-            className="input"
+            className={`input ${fieldErrors.linkedToType ? 'input-error' : ''}`}
             value={linkedToType}
             onChange={(e) => setLinkedToType(e.target.value as '' | LinkedEntityType)}
+            aria-invalid={!!fieldErrors.linkedToType}
+            aria-describedby={fieldErrors.linkedToType ? 'linkedToType-error' : undefined}
           >
             {LINKED_ENTITY_OPTIONS.map((opt) => (
               <option key={opt.value} value={opt.value}>{opt.label}</option>
             ))}
           </select>
+          {fieldErrors.linkedToType && (
+            <p id="linkedToType-error" className="mt-1 text-sm text-red-600" role="alert">
+              {fieldErrors.linkedToType}
+            </p>
+          )}
         </div>
 
         {linkedToType && (
