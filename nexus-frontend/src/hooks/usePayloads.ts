@@ -3,6 +3,14 @@ import { payloadsApi } from '@/api/payloads';
 import type { SubmitPayloadRequest } from '@/types/payload';
 import type { PaginationParams } from '@/types/api';
 
+export function useAllPayloads(params: PaginationParams) {
+  return useQuery({
+    queryKey: ['payloads', 'all', params],
+    queryFn: () => payloadsApi.listAll(params),
+    staleTime: 15_000,
+  });
+}
+
 export function usePayloads(contractId: string, params: PaginationParams) {
   return useQuery({
     queryKey: ['payloads', contractId, params],
