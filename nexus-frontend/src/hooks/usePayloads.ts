@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
+import { useQuery, useMutation, useQueryClient, keepPreviousData } from '@tanstack/react-query';
 import { payloadsApi } from '@/api/payloads';
 import type { SubmitPayloadRequest } from '@/types/payload';
 import type { PaginationParams } from '@/types/api';
@@ -8,6 +8,7 @@ export function useAllPayloads(params: PaginationParams) {
     queryKey: ['payloads', 'all', params],
     queryFn: () => payloadsApi.listAll(params),
     staleTime: 15_000,
+    placeholderData: keepPreviousData,
   });
 }
 
