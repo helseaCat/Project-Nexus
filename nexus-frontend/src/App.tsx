@@ -14,6 +14,7 @@ import { TaskListPage } from '@/pages/tasks/TaskListPage';
 import { TaskDetailPage } from '@/pages/tasks/TaskDetailPage';
 import { TaskFormPage } from '@/pages/tasks/TaskFormPage';
 import { PayloadListPage } from '@/pages/payloads/PayloadListPage';
+import { DeviationListPage } from '@/pages/payloads/DeviationListPage';
 import { ROUTES } from '@/utils/routes';
 
 const queryClient = new QueryClient({
@@ -48,7 +49,7 @@ export default function App() {
                 <Route path={ROUTES.PAYLOADS} element={<PayloadListPage />} />
                 <Route path={ROUTES.PAYLOAD_DETAIL} element={<Placeholder name="Payload Detail" />} />
                 <Route path={ROUTES.PAYLOAD_SUBMIT} element={<Placeholder name="Submit Payload" />} />
-                <Route path={ROUTES.DEVIATIONS} element={<Placeholder name="Deviations" />} />
+                <Route path={ROUTES.DEVIATIONS} element={<DeviationListPage />} />
                 <Route path={ROUTES.CONTRACT_EDIT} element={<ContractFormPage />} />
                 <Route path={ROUTES.EXPECTATION_EDIT} element={<ExpectationFormPage />} />
                 <Route path="*" element={<Placeholder name="Page Not Found" />} />

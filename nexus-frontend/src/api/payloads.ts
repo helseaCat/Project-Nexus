@@ -27,4 +27,8 @@ export const payloadsApi = {
   listDeviationsByContract: (contractId: string, params: PaginationParams) =>
     apiClient.get<PageResponse<Deviation>>(`/payloads/deviations/by-contract/${contractId}`, { params })
       .then((r) => r.data),
+
+  listAllDeviations: (params: PaginationParams & { severity?: string; contractId?: string }) =>
+    apiClient.get<PageResponse<Deviation>>('/deviations', { params })
+      .then((r) => r.data),
 };
