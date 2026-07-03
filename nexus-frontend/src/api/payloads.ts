@@ -4,6 +4,10 @@ import type { Deviation } from '@/types/deviation';
 import type { PageResponse, PaginationParams } from '@/types/api';
 
 export const payloadsApi = {
+  listAll: (params: PaginationParams) =>
+    apiClient.get<PageResponse<Payload>>('/payloads', { params })
+      .then((r) => r.data),
+
   list: (contractId: string, params: PaginationParams) =>
     apiClient.get<PageResponse<Payload>>(`/payloads/by-contract/${contractId}`, { params })
       .then((r) => r.data),
