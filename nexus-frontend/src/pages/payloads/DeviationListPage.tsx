@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useDeviations } from '@/hooks/usePayloads';
 import { DataTable, type Column } from '@/components/DataTable';
 import { Pagination } from '@/components/Pagination';
@@ -50,12 +50,21 @@ export function DeviationListPage() {
   const [page, setPage] = useState(0);
   const [severity, setSeverity] = useState<'' | Severity>('');
   const [contractId, setContractId] = useState('');
+  const [debouncedContractId, setDebouncedContractId] = useState('');
+
+  useEffect(() => {
+    const t = setTimeout(() => {
+      setDebouncedContractId(contractId.trim());
+      setPage(0);
+    }, 300);
+    return () => clearTimeout(t);
+  }, [contractId]);
 
   const { data, isLoading, error, refetch } = useDeviations({
     page,
     size: PAGE_SIZE,
     ...(severity ? { severity } : {}),
-    ...(contractId.trim() ? { contractId: contractId.trim() } : {}),
+    ...(debouncedContractId ? { contractId: debouncedContractId } : {}),
   });
 
   if (isLoading) return <LoadingSpinner />;
@@ -97,10 +106,7 @@ export function DeviationListPage() {
             type="text"
             placeholder="Contract ID…"
             value={contractId}
-            onChange={(e) => {
-              setContractId(e.target.value);
-              setPage(0);
-            }}
+            onChange={(e) => setContractId(e.target.value)}
             className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
           />
         </div>
