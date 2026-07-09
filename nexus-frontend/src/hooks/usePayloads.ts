@@ -54,3 +54,12 @@ export function useDeviationsByContract(contractId: string, params: PaginationPa
     staleTime: 60_000,
   });
 }
+
+export function useDeviations(params: PaginationParams & { severity?: string; contractId?: string }) {
+  return useQuery({
+    queryKey: ['deviations', 'all', params],
+    queryFn: () => payloadsApi.listAllDeviations(params),
+    staleTime: 60_000,
+    placeholderData: keepPreviousData,
+  });
+}
