@@ -25,22 +25,36 @@ export function PayloadFormPage() {
 
   const publishedContracts = contracts.data?.content ?? [];
 
+  if (publishedContracts.length === 0) {
+    return (
+      <div>
+        <h1 className="text-2xl font-bold text-gray-900 mb-6">Submit Payload</h1>
+        <ErrorMessage message="No published contracts available. Please publish a contract first." />
+      </div>
+    );
+  }
+
   async function handleSubmit(e: FormEvent) {
     e.preventDefault();
     setFieldErrors({});
     setFormError('');
 
-    // Validate JSON
+    // Validate all fields at once
+    const errors: Record<string, string> = {};
+
     let parsed: unknown;
     try {
       parsed = JSON.parse(rawPayload);
     } catch {
-      setFieldErrors((prev) => ({ ...prev, rawPayload: 'Invalid JSON format.' }));
-      return;
+      errors.rawPayload = 'Invalid JSON format.';
     }
 
     if (!dataContractId) {
-      setFieldErrors((prev) => ({ ...prev, dataContractId: 'Please select a contract.' }));
+      errors.dataContractId = 'Please select a contract.';
+    }
+
+    if (Object.keys(errors).length > 0) {
+      setFieldErrors(errors);
       return;
     }
 
@@ -53,7 +67,13 @@ export function PayloadFormPage() {
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.data) {
         const apiError = err.response.data as ApiError;
-        if (apiError.errors) {
+        if (apiError.details) {
+          const mapped: Record<string, string> = {};
+          for (const entry of apiError.details) {
+            mapped[entry.field] = entry.message;
+          }
+          setFieldErrors(mapped);
+        } else if (apiError.errors) {
           setFieldErrors(apiError.errors);
         } else {
           setFormError(apiError.message || 'An error occurred. Please try again.');
