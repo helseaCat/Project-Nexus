@@ -67,7 +67,7 @@ export function PayloadFormPage() {
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.data) {
         const apiError = err.response.data as ApiError;
-        if (apiError.details) {
+        if (apiError.details?.length) {
           const mapped: Record<string, string> = {};
           for (const entry of apiError.details) {
             mapped[entry.field] = entry.message;
