@@ -16,7 +16,9 @@ export interface PaginationParams {
 
 /** Standard API error response from the backend. */
 export interface ApiError {
+  error: string;
   status: number;
   message: string;
-  errors?: Record<string, string>; // field -> error message
+  errors?: Record<string, string>; // field -> error message (legacy/convenience)
+  details?: { field: string; message: string }[]; // validation errors from backend
 }
