@@ -5,6 +5,7 @@ import { Pagination } from '@/components/Pagination';
 import { StatusBadge } from '@/components/StatusBadge';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { ErrorMessage } from '@/components/ErrorMessage';
+import { DeviationDetailPanel } from './DeviationDetailPanel';
 import type { Deviation } from '@/types/deviation';
 import type { Severity } from '@/types/expectation';
 
@@ -51,6 +52,7 @@ export function DeviationListPage() {
   const [severity, setSeverity] = useState<'' | Severity>('');
   const [contractId, setContractId] = useState('');
   const [debouncedContractId, setDebouncedContractId] = useState('');
+  const [selectedDeviation, setSelectedDeviation] = useState<Deviation | null>(null);
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -116,10 +118,18 @@ export function DeviationListPage() {
         columns={columns}
         data={deviations}
         keyExtractor={(d) => d.id}
+        onRowClick={(d) => setSelectedDeviation(d)}
         emptyMessage="No deviations found."
       />
 
       <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+
+      {selectedDeviation && (
+        <DeviationDetailPanel
+          deviation={selectedDeviation}
+          onClose={() => setSelectedDeviation(null)}
+        />
+      )}
     </div>
   );
 }
