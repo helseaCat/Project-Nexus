@@ -1,3 +1,4 @@
+import { useEffect, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { StatusBadge } from '@/components/StatusBadge';
 import { ROUTES, buildRoute } from '@/utils/routes';
@@ -10,18 +11,62 @@ interface DeviationDetailPanelProps {
 
 export function DeviationDetailPanel({ deviation, onClose }: DeviationDetailPanelProps) {
   const navigate = useNavigate();
+  const panelRef = useRef<HTMLDivElement>(null);
+  const previousFocusRef = useRef<HTMLElement | null>(null);
+
+  useEffect(() => {
+    previousFocusRef.current = document.activeElement as HTMLElement | null;
+
+    // Focus the panel on open
+    panelRef.current?.focus();
+
+    function handleKeyDown(e: KeyboardEvent) {
+      if (e.key === 'Escape') {
+        onClose();
+        return;
+      }
+
+      // Trap focus within the panel
+      if (e.key === 'Tab' && panelRef.current) {
+        const focusable = panelRef.current.querySelectorAll<HTMLElement>(
+          'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
+        );
+        if (focusable.length === 0) return;
+        const first = focusable[0]!;
+        const last = focusable[focusable.length - 1]!;
+
+        if (e.shiftKey && document.activeElement === first) {
+          e.preventDefault();
+          last.focus();
+        } else if (!e.shiftKey && document.activeElement === last) {
+          e.preventDefault();
+          first.focus();
+        }
+      }
+    }
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      previousFocusRef.current?.focus();
+    };
+  }, [onClose]);
+
+  const { expectationId } = deviation;
 
   return (
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
       onClick={onClose}
-      role="dialog"
-      aria-modal="true"
-      aria-label="Deviation details"
     >
       <div
-        className="relative w-full max-w-lg rounded-lg bg-white p-6 shadow-xl"
+        ref={panelRef}
+        className="relative w-full max-w-lg max-h-[90vh] overflow-y-auto rounded-lg bg-white p-6 shadow-xl"
         onClick={(e) => e.stopPropagation()}
+        role="dialog"
+        aria-modal="true"
+        aria-label="Deviation details"
+        tabIndex={-1}
       >
         <button
           type="button"
@@ -78,11 +123,11 @@ export function DeviationDetailPanel({ deviation, onClose }: DeviationDetailPane
           >
             View Contract
           </button>
-          {deviation.expectationId && (
+          {expectationId && (
             <button
               type="button"
               className="btn-secondary text-sm"
-              onClick={() => navigate(buildRoute(ROUTES.EXPECTATION_DETAIL, { id: deviation.expectationId! }))}
+              onClick={() => navigate(buildRoute(ROUTES.EXPECTATION_DETAIL, { id: expectationId }))}
             >
               View Expectation
             </button>
