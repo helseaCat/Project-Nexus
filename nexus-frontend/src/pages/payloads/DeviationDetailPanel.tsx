@@ -1,4 +1,5 @@
 import { useEffect, useRef } from 'react';
+import { createPortal } from 'react-dom';
 import { useNavigate } from 'react-router-dom';
 import { StatusBadge } from '@/components/StatusBadge';
 import { ROUTES, buildRoute } from '@/utils/routes';
@@ -13,8 +14,6 @@ export function DeviationDetailPanel({ deviation, onClose }: DeviationDetailPane
   const navigate = useNavigate();
   const panelRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
-  const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
 
   useEffect(() => {
     previousFocusRef.current = document.activeElement as HTMLElement | null;
@@ -31,7 +30,7 @@ export function DeviationDetailPanel({ deviation, onClose }: DeviationDetailPane
 
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') {
-        onCloseRef.current();
+        onClose();
         return;
       }
 
@@ -68,16 +67,16 @@ export function DeviationDetailPanel({ deviation, onClose }: DeviationDetailPane
       document.body.style.overflow = originalBodyOverflow;
       previousFocusRef.current?.focus();
     };
-  }, []);
+  }, [onClose]);
 
   const { expectationId } = deviation;
 
   function handleNavigate(path: string) {
-    onCloseRef.current();
+    onClose();
     navigate(path);
   }
 
-  return (
+  return createPortal(
     <div
       className="fixed inset-0 z-50 flex items-center justify-center bg-black/40"
       onClick={onClose}
@@ -163,6 +162,7 @@ export function DeviationDetailPanel({ deviation, onClose }: DeviationDetailPane
           )}
         </div>
       </div>
-    </div>
+    </div>,
+    document.body
   );
 }
