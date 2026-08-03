@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useDeviations } from '@/hooks/usePayloads';
 import { DataTable, type Column } from '@/components/DataTable';
 import { Pagination } from '@/components/Pagination';
@@ -53,6 +53,7 @@ export function DeviationListPage() {
   const [contractId, setContractId] = useState('');
   const [debouncedContractId, setDebouncedContractId] = useState('');
   const [selectedDeviation, setSelectedDeviation] = useState<Deviation | null>(null);
+  const handleClosePanel = useCallback(() => setSelectedDeviation(null), []);
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -127,7 +128,7 @@ export function DeviationListPage() {
       {selectedDeviation && (
         <DeviationDetailPanel
           deviation={selectedDeviation}
-          onClose={() => setSelectedDeviation(null)}
+          onClose={handleClosePanel}
         />
       )}
     </div>

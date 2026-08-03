@@ -13,6 +13,8 @@ export function DeviationDetailPanel({ deviation, onClose }: DeviationDetailPane
   const navigate = useNavigate();
   const panelRef = useRef<HTMLDivElement>(null);
   const previousFocusRef = useRef<HTMLElement | null>(null);
+  const onCloseRef = useRef(onClose);
+  onCloseRef.current = onClose;
 
   useEffect(() => {
     previousFocusRef.current = document.activeElement as HTMLElement | null;
@@ -20,9 +22,13 @@ export function DeviationDetailPanel({ deviation, onClose }: DeviationDetailPane
     // Focus the panel on open
     panelRef.current?.focus();
 
+    // Lock body scroll
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = 'hidden';
+
     function handleKeyDown(e: KeyboardEvent) {
       if (e.key === 'Escape') {
-        onClose();
+        onCloseRef.current();
         return;
       }
 
@@ -31,14 +37,21 @@ export function DeviationDetailPanel({ deviation, onClose }: DeviationDetailPane
         const focusable = panelRef.current.querySelectorAll<HTMLElement>(
           'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])'
         );
-        if (focusable.length === 0) return;
+        if (focusable.length === 0) {
+          e.preventDefault();
+          return;
+        }
         const first = focusable[0]!;
         const last = focusable[focusable.length - 1]!;
+        const active = document.activeElement;
 
-        if (e.shiftKey && document.activeElement === first) {
+        // Handle Tab when focus is on the container itself (tabIndex=-1)
+        const isOnContainer = active === panelRef.current;
+
+        if (e.shiftKey && (active === first || isOnContainer)) {
           e.preventDefault();
           last.focus();
-        } else if (!e.shiftKey && document.activeElement === last) {
+        } else if (!e.shiftKey && (active === last || isOnContainer)) {
           e.preventDefault();
           first.focus();
         }
@@ -48,9 +61,10 @@ export function DeviationDetailPanel({ deviation, onClose }: DeviationDetailPane
     document.addEventListener('keydown', handleKeyDown);
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
+      document.body.style.overflow = originalOverflow;
       previousFocusRef.current?.focus();
     };
-  }, [onClose]);
+  }, []);
 
   const { expectationId } = deviation;
 
