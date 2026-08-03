@@ -22,8 +22,11 @@ export function DeviationDetailPanel({ deviation, onClose }: DeviationDetailPane
     // Focus the panel on open
     panelRef.current?.focus();
 
-    // Lock body scroll
-    const originalOverflow = document.body.style.overflow;
+    // Lock scroll on the AppShell main container and body
+    const mainEl = document.querySelector('main');
+    const originalMainOverflow = mainEl?.style.overflow ?? '';
+    const originalBodyOverflow = document.body.style.overflow;
+    if (mainEl) mainEl.style.overflow = 'hidden';
     document.body.style.overflow = 'hidden';
 
     function handleKeyDown(e: KeyboardEvent) {
@@ -61,12 +64,18 @@ export function DeviationDetailPanel({ deviation, onClose }: DeviationDetailPane
     document.addEventListener('keydown', handleKeyDown);
     return () => {
       document.removeEventListener('keydown', handleKeyDown);
-      document.body.style.overflow = originalOverflow;
+      if (mainEl) mainEl.style.overflow = originalMainOverflow;
+      document.body.style.overflow = originalBodyOverflow;
       previousFocusRef.current?.focus();
     };
   }, []);
 
   const { expectationId } = deviation;
+
+  function handleNavigate(path: string) {
+    onCloseRef.current();
+    navigate(path);
+  }
 
   return (
     <div
@@ -79,7 +88,7 @@ export function DeviationDetailPanel({ deviation, onClose }: DeviationDetailPane
         onClick={(e) => e.stopPropagation()}
         role="dialog"
         aria-modal="true"
-        aria-label="Deviation details"
+        aria-labelledby="deviation-panel-title"
         tabIndex={-1}
       >
         <button
@@ -91,7 +100,9 @@ export function DeviationDetailPanel({ deviation, onClose }: DeviationDetailPane
           ✕
         </button>
 
-        <h2 className="text-lg font-semibold text-gray-900 mb-4">Deviation Details</h2>
+        <h2 id="deviation-panel-title" className="text-lg font-semibold text-gray-900 mb-4">
+          Deviation Details
+        </h2>
 
         <div className="mb-4">
           <StatusBadge status={deviation.severity} />
@@ -100,16 +111,20 @@ export function DeviationDetailPanel({ deviation, onClose }: DeviationDetailPane
         <dl className="space-y-3">
           <div>
             <dt className="text-sm font-medium text-gray-500">Description</dt>
-            <dd className="mt-1 text-sm text-gray-900">{deviation.description}</dd>
+            <dd className="mt-1 text-sm text-gray-900 break-words">{deviation.description}</dd>
           </div>
           <div className="grid grid-cols-2 gap-4">
             <div>
               <dt className="text-sm font-medium text-gray-500">Detected Value</dt>
-              <dd className="mt-1 text-sm text-gray-900 font-mono">{deviation.detectedValue}</dd>
+              <dd className="mt-1 text-sm text-gray-900 font-mono break-all overflow-x-auto">
+                {deviation.detectedValue}
+              </dd>
             </div>
             <div>
               <dt className="text-sm font-medium text-gray-500">Expected Value</dt>
-              <dd className="mt-1 text-sm text-gray-900 font-mono">{deviation.expectedValue}</dd>
+              <dd className="mt-1 text-sm text-gray-900 font-mono break-all overflow-x-auto">
+                {deviation.expectedValue}
+              </dd>
             </div>
           </div>
           <div>
@@ -126,14 +141,14 @@ export function DeviationDetailPanel({ deviation, onClose }: DeviationDetailPane
           <button
             type="button"
             className="btn-secondary text-sm"
-            onClick={() => navigate(buildRoute(ROUTES.PAYLOAD_DETAIL, { id: deviation.payloadId }))}
+            onClick={() => handleNavigate(buildRoute(ROUTES.PAYLOAD_DETAIL, { id: deviation.payloadId }))}
           >
             View Payload
           </button>
           <button
             type="button"
             className="btn-secondary text-sm"
-            onClick={() => navigate(buildRoute(ROUTES.CONTRACT_DETAIL, { id: deviation.dataContractId }))}
+            onClick={() => handleNavigate(buildRoute(ROUTES.CONTRACT_DETAIL, { id: deviation.dataContractId }))}
           >
             View Contract
           </button>
@@ -141,7 +156,7 @@ export function DeviationDetailPanel({ deviation, onClose }: DeviationDetailPane
             <button
               type="button"
               className="btn-secondary text-sm"
-              onClick={() => navigate(buildRoute(ROUTES.EXPECTATION_DETAIL, { id: expectationId }))}
+              onClick={() => handleNavigate(buildRoute(ROUTES.EXPECTATION_DETAIL, { id: expectationId }))}
             >
               View Expectation
             </button>
