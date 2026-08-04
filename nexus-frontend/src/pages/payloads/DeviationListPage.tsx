@@ -70,67 +70,72 @@ export function DeviationListPage() {
     ...(debouncedContractId ? { contractId: debouncedContractId } : {}),
   });
 
-  if (isLoading) return <LoadingSpinner />;
-  if (error) return <ErrorMessage message="Failed to load deviations" onRetry={() => refetch()} />;
-
   const deviations = data?.content ?? [];
   const totalPages = data?.totalPages ?? 0;
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Deviations</h1>
-
-      <div className="mb-4 flex flex-wrap gap-3">
-        <div>
-          <label htmlFor="severity-filter" className="sr-only">
-            Filter by severity
-          </label>
-          <select
-            id="severity-filter"
-            value={severity}
-            onChange={(e) => {
-              setSeverity(e.target.value as '' | Severity);
-              setPage(0);
-            }}
-            className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          >
-            {SEVERITY_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-        </div>
-
-        <div>
-          <label htmlFor="contract-filter" className="sr-only">
-            Filter by contract ID
-          </label>
-          <input
-            id="contract-filter"
-            type="text"
-            placeholder="Contract ID…"
-            value={contractId}
-            onChange={(e) => setContractId(e.target.value)}
-            className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          />
-        </div>
-      </div>
-
-      <DataTable
-        columns={columns}
-        data={deviations}
-        keyExtractor={(d) => d.id}
-        onRowClick={(d) => setSelectedDeviation(d)}
-        emptyMessage="No deviations found."
-      />
-
-      <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
-
+    <>
       {selectedDeviation && (
         <DeviationDetailPanel
           deviation={selectedDeviation}
           onClose={handleClosePanel}
         />
       )}
-    </div>
+
+      {isLoading ? (
+        <LoadingSpinner />
+      ) : error ? (
+        <ErrorMessage message="Failed to load deviations" onRetry={() => refetch()} />
+      ) : (
+        <div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-6">Deviations</h1>
+
+          <div className="mb-4 flex flex-wrap gap-3">
+            <div>
+              <label htmlFor="severity-filter" className="sr-only">
+                Filter by severity
+              </label>
+              <select
+                id="severity-filter"
+                value={severity}
+                onChange={(e) => {
+                  setSeverity(e.target.value as '' | Severity);
+                  setPage(0);
+                }}
+                className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+                {SEVERITY_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="contract-filter" className="sr-only">
+                Filter by contract ID
+              </label>
+              <input
+                id="contract-filter"
+                type="text"
+                placeholder="Contract ID…"
+                value={contractId}
+                onChange={(e) => setContractId(e.target.value)}
+                className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+
+          <DataTable
+            columns={columns}
+            data={deviations}
+            keyExtractor={(d) => d.id}
+            onRowClick={(d) => setSelectedDeviation(d)}
+            emptyMessage="No deviations found."
+          />
+
+          <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
+        </div>
+      )}
+    </>
   );
 }
