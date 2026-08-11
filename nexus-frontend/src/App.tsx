@@ -17,6 +17,7 @@ import { PayloadListPage } from '@/pages/payloads/PayloadListPage';
 import { DeviationListPage } from '@/pages/payloads/DeviationListPage';
 import { PayloadDetailPage } from '@/pages/payloads/PayloadDetailPage';
 import { PayloadFormPage } from '@/pages/payloads/PayloadFormPage';
+import { LoginPage } from '@/auth/LoginPage';
 import { ROUTES } from '@/utils/routes';
 
 const queryClient = new QueryClient({
@@ -35,7 +36,7 @@ export default function App() {
       <AuthProvider>
         <BrowserRouter>
           <Routes>
-            <Route path={ROUTES.LOGIN} element={<Placeholder name="Login" />} />
+            <Route path={ROUTES.LOGIN} element={<LoginPage />} />
             <Route element={<ProtectedRoute />}>
               <Route element={<AppShell />}>
                 <Route path={ROUTES.DASHBOARD} element={<DashboardPage />} />
