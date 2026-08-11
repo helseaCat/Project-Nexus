@@ -1,10 +1,11 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useDeviations } from '@/hooks/usePayloads';
 import { DataTable, type Column } from '@/components/DataTable';
 import { Pagination } from '@/components/Pagination';
 import { StatusBadge } from '@/components/StatusBadge';
 import { LoadingSpinner } from '@/components/LoadingSpinner';
 import { ErrorMessage } from '@/components/ErrorMessage';
+import { DeviationDetailPanel } from './DeviationDetailPanel';
 import type { Deviation } from '@/types/deviation';
 import type { Severity } from '@/types/expectation';
 
@@ -51,6 +52,8 @@ export function DeviationListPage() {
   const [severity, setSeverity] = useState<'' | Severity>('');
   const [contractId, setContractId] = useState('');
   const [debouncedContractId, setDebouncedContractId] = useState('');
+  const [selectedDeviation, setSelectedDeviation] = useState<Deviation | null>(null);
+  const handleClosePanel = useCallback(() => setSelectedDeviation(null), []);
 
   useEffect(() => {
     const t = setTimeout(() => {
@@ -67,59 +70,72 @@ export function DeviationListPage() {
     ...(debouncedContractId ? { contractId: debouncedContractId } : {}),
   });
 
-  if (isLoading) return <LoadingSpinner />;
-  if (error) return <ErrorMessage message="Failed to load deviations" onRetry={() => refetch()} />;
-
   const deviations = data?.content ?? [];
   const totalPages = data?.totalPages ?? 0;
 
   return (
-    <div>
-      <h1 className="text-2xl font-bold text-gray-900 mb-6">Deviations</h1>
+    <>
+      {selectedDeviation && (
+        <DeviationDetailPanel
+          deviation={selectedDeviation}
+          onClose={handleClosePanel}
+        />
+      )}
 
-      <div className="mb-4 flex flex-wrap gap-3">
+      {isLoading ? (
+        <LoadingSpinner />
+      ) : error ? (
+        <ErrorMessage message="Failed to load deviations" onRetry={() => refetch()} />
+      ) : (
         <div>
-          <label htmlFor="severity-filter" className="sr-only">
-            Filter by severity
-          </label>
-          <select
-            id="severity-filter"
-            value={severity}
-            onChange={(e) => {
-              setSeverity(e.target.value as '' | Severity);
-              setPage(0);
-            }}
-            className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
-          >
-            {SEVERITY_OPTIONS.map((opt) => (
-              <option key={opt.value} value={opt.value}>{opt.label}</option>
-            ))}
-          </select>
-        </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-6">Deviations</h1>
 
-        <div>
-          <label htmlFor="contract-filter" className="sr-only">
-            Filter by contract ID
-          </label>
-          <input
-            id="contract-filter"
-            type="text"
-            placeholder="Contract ID…"
-            value={contractId}
-            onChange={(e) => setContractId(e.target.value)}
-            className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+          <div className="mb-4 flex flex-wrap gap-3">
+            <div>
+              <label htmlFor="severity-filter" className="sr-only">
+                Filter by severity
+              </label>
+              <select
+                id="severity-filter"
+                value={severity}
+                onChange={(e) => {
+                  setSeverity(e.target.value as '' | Severity);
+                  setPage(0);
+                }}
+                className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              >
+                {SEVERITY_OPTIONS.map((opt) => (
+                  <option key={opt.value} value={opt.value}>{opt.label}</option>
+                ))}
+              </select>
+            </div>
+
+            <div>
+              <label htmlFor="contract-filter" className="sr-only">
+                Filter by contract ID
+              </label>
+              <input
+                id="contract-filter"
+                type="text"
+                placeholder="Contract ID…"
+                value={contractId}
+                onChange={(e) => setContractId(e.target.value)}
+                className="rounded-md border border-gray-300 px-3 py-2 text-sm focus:border-blue-500 focus:outline-none focus:ring-1 focus:ring-blue-500"
+              />
+            </div>
+          </div>
+
+          <DataTable
+            columns={columns}
+            data={deviations}
+            keyExtractor={(d) => d.id}
+            onRowClick={(d) => setSelectedDeviation(d)}
+            emptyMessage="No deviations found."
           />
+
+          <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
         </div>
-      </div>
-
-      <DataTable
-        columns={columns}
-        data={deviations}
-        keyExtractor={(d) => d.id}
-        emptyMessage="No deviations found."
-      />
-
-      <Pagination currentPage={page} totalPages={totalPages} onPageChange={setPage} />
-    </div>
+      )}
+    </>
   );
 }
