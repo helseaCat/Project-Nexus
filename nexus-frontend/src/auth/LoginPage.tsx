@@ -46,8 +46,12 @@ export function LoginPage() {
         email: email.trim(),
         password,
       });
+      if (!data?.token) {
+        setError('Login failed. Please try again.');
+        return;
+      }
       login(data.token);
-      navigate(ROUTES.DASHBOARD, { replace: true });
+      // Navigation handled by useEffect watching isAuthenticated
     } catch (err) {
       if (axios.isAxiosError(err) && err.response?.status === 401) {
         setError('Invalid email or password.');
